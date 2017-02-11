@@ -9,8 +9,6 @@ function log(level, ...args) {
   console.log(`[${level}] ${new Date().toISOString()} ${args}`);
 }
 
-let commands = {};
-
 const logger = {
   info:  (...args) => { log('INFO', args)  },
   debug: (...args) => { log('DEBUG', args) }
@@ -20,11 +18,25 @@ client.on('ready', () => {
   logger.info("My body is ready..");
 });
 
+let commands = {};
+
+const prefix = 'zm';
+
 client.on('message', (msg) => {
   logger.info(msg.author.username, msg.content);
 
-  if (msg.content === "ping") {
-    msg.channel.sendMessage("pong");
+  if (msg.content.startsWith(prefix)) {
+
+    // prevent botception
+    if (msg.author.bot) return;
+
+    let content = msg.content.split(' ')[1];
+    
+    logger.debug(content);
+
+    if (content === "ping") msg.reply("pong");
+
+    if (content === "reset") msg.reply("resetting available champion pool");
   }
 });
 
