@@ -1,0 +1,28 @@
+{
+  "name": "zen-master",
+  "version": "1.0.0",
+  "description": "League of Legends team selector bot for Discord.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mostlyerror/zen-master.git"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "lol",
+    "games"
+  ],
+  "author": "Ben Poon",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mostlyerror/zen-master/issues"
+  },
+  "homepage": "https://github.com/mostlyerror/zen-master#readme",
+  "dependencies": {
+    "discord.js": "^11.0.0"
+  }
+}
