@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/mostlyerror/zen-master#readme",
   "dependencies": {
-    "discord.js": "^11.0.0"
+    "discord.js": "^11.0.0",
+    "leagueapi": "^0.4.21"
   }
 }

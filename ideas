@@ -1,0 +1,25 @@
+
+What problem am I going to solve?
+Sub-optimal team composition choices in League of Legends (LoL).
+
+How will users interact with it?
+Discord bot
+
+/counters  <champion>
+[list of champions with low WR % vs champion]
+[list of champions with high WR % vs champion]
+
+/ban <champion>
+add champion to list of champions selected
+remove champ from pool of pickable champions
+
+/pick <champion>
+add champion to list of champions selected
+remove champ from pool of pickable champions
+
+server listens to messages from discord? 
+
+
+
+tech discordjs
+because nodejs, es6, existing library
