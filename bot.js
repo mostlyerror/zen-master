@@ -1,8 +1,5 @@
-
+const request = require('superagent');
 const Discord = require('discord.js');
-
-const client = new Discord.Client();
-const token = 'Mjc5Nzc4NjA4MDg2Nzc3ODU3.C3_2QA.nosV5EIvvl8ageIAGoWDlbTUqp4';
 
 function log(level, ...args) {
   console.log(`[${level}] ${new Date().toISOString()} ${args}`);
@@ -16,6 +13,10 @@ const logger = {
 
 let data = {};
 
+const discordToken = 'Mjc5Nzc4NjA4MDg2Nzc3ODU3.C3_2QA.nosV5EIvvl8ageIAGoWDlbTUqp4';
+const riotApiKey = '98b67977-fba4-4435-88a0-461acf65bb34';
+const client = new Discord.Client();
+
 client.on('ready', () => {
   logger.info("My body is ready..");
 
@@ -24,7 +25,8 @@ client.on('ready', () => {
   // local database acts as a cache, kinda
 });
 
-let commands = {};
+// in the future, a dispatch function of sorts
+//let commands = {};
 
 const prefix = 'zm';
 
@@ -37,19 +39,45 @@ client.on('message', (msg) => {
     // prevent botception
     if (msg.author.bot) return;
 
-    let content = msg.content.split(' ')[1];
-    logger.debug(content);
+    const command = msg.content.split(' ')[1];
 
-    if (content === "ping") msg.reply("pong");
+    logger.info("Command was " + command);
 
-    if (content === "reset") {
-      msg.reply("resetting available champion pool");
+    if (command === "ping") msg.reply("pong");
+
+    // zm summoner <summonerName>
+    if (command.startsWith("summoner")) {
+      
+      logger.debug('msg.content', msg.content);
+
+      const splitContent = msg.content.split(" ");
+      const summonerName = splitContent[splitContent.length - 1];
+
+      //logger.debug('splitContent', splitContent);
+      //logger.debug('summonerName', summonerName);
+
+      // find the current game that the summoner is in
+      const summonerByNameURL = `https://na.api.pvp.net/api/lol/na/v1.4/summoner/by-name/${summonerName}?api_key=${riotApiKey}`;
+      logger.info("Requesting URL", summonerByNameURL);
+      request
+        .get(summonerByNameURL)
+        .set('Accept', 'application/json')
+        .end(function(err, res){
+          let summonerData = res.req.res.text;
+          //let summonerData = JSON.parse(res.req.res.text);
+          logger.debug(summonerData);
+
+          msg.reply("Here you go...");
+          msg.channel.send(summonerData);
+          msg.channel.send(" ..homo.");
+        });
     }
+
+    //if (content === "reset") { msg.reply("resetting available champion pool"); }
 
     // add shrek thing
     // http://knowyourmeme.com/memes/shrek-is-love-shrek-is-life
   }
 });
 
-
-client.login(token);
+client.login(discordToken);
