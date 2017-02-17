@@ -1,5 +1,6 @@
 const request = require('superagent');
 const Discord = require('discord.js');
+const pry     = require('pryjs');
 
 function log(level, ...args) {
   console.log(`[${level}] ${new Date().toISOString()} ${args}`);
