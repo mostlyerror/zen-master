@@ -1,6 +1,5 @@
 
 const Discord = require('discord.js');
-var LolApi = require('leagueapi');
 
 const client = new Discord.Client();
 const token = 'Mjc5Nzc4NjA4MDg2Nzc3ODU3.C3_2QA.nosV5EIvvl8ageIAGoWDlbTUqp4';
@@ -15,20 +14,14 @@ const logger = {
   error: (...args) => { log('ERROR', args) },
 };
 
-let globalData = {};
+let data = {};
 
 client.on('ready', () => {
   logger.info("My body is ready..");
- 
-  LolApi.init('t98b67977-fba4-4435-88a0-461acf65bb34', 'na');
 
-  logger.info("Fetching champions..");
-
-
-  LolApi.getChampions(true, function(err, champs) {
-    logger.info(champs);
-    globalData.champs = champs;
-  });
+  // this should pull from a database
+  // then "failover" to request from Riot API
+  // local database acts as a cache, kinda
 });
 
 let commands = {};
@@ -38,22 +31,23 @@ const prefix = 'zm';
 client.on('message', (msg) => {
   logger.info(msg.author.username, msg.content);
 
+  // only handle zm <message>
   if (msg.content.startsWith(prefix)) {
 
     // prevent botception
     if (msg.author.bot) return;
 
     let content = msg.content.split(' ')[1];
-    
     logger.debug(content);
 
     if (content === "ping") msg.reply("pong");
 
-    if (content === "reset") msg.reply("resetting available champion pool");
+    if (content === "reset") {
+      msg.reply("resetting available champion pool");
+    }
 
     // add shrek thing
     // http://knowyourmeme.com/memes/shrek-is-love-shrek-is-life
-
   }
 });
 
