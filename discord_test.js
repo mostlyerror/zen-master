@@ -23,6 +23,8 @@ client.on('ready', () => {
   logger.info("My body is ready..");
   const channel = client.channels.find('type', 'text');
   logger.debug(util.inspect(channel));
+
+  channel.send('shrek is love. shrek is life.', {tts: true});
 });
 
 // in the future, a dispatch function of sorts
