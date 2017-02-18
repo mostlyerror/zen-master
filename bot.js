@@ -3,7 +3,7 @@ const Discord = require('discord.js');
 const pry     = require('pryjs');
 
 function log(level, ...args) {
-  console.log(`[${level}] ${new Date().toISOString()} ${args}`);
+  console.log(`[${level}]\t${new Date().toISOString()} ${args}`);
 }
 
 const logger = {
@@ -12,7 +12,11 @@ const logger = {
   error: (...args) => { log('ERROR', args) },
 };
 
-let data = {};
+// this is my in-memory cache
+let data = {
+  summoners: {
+  }
+};
 
 const discordToken = 'Mjc5Nzc4NjA4MDg2Nzc3ODU3.C3_2QA.nosV5EIvvl8ageIAGoWDlbTUqp4';
 const riotApiKey = '98b67977-fba4-4435-88a0-461acf65bb34';
@@ -47,31 +51,51 @@ client.on('message', (msg) => {
     if (command === "ping") msg.reply("pong");
 
     // zm summoner <summonerName>
-    if (command.startsWith("summoner")) {
+    if (command === "summoner") {
       
       logger.debug('msg.content', msg.content);
 
       const splitContent = msg.content.split(" ");
       const summonerName = splitContent[splitContent.length - 1];
 
-      //logger.debug('splitContent', splitContent);
-      //logger.debug('summonerName', summonerName);
+      // look up summoner data in cache first
+      let summonerData = data.summoners[summonerName];
 
-      // find the current game that the summoner is in
-      const summonerByNameURL = `https://na.api.pvp.net/api/lol/na/v1.4/summoner/by-name/${summonerName}?api_key=${riotApiKey}`;
-      logger.info("Requesting URL", summonerByNameURL);
-      request
-        .get(summonerByNameURL)
-        .set('Accept', 'application/json')
-        .end(function(err, res){
-          let summonerData = res.req.res.text;
-          //let summonerData = JSON.parse(res.req.res.text);
-          logger.debug(summonerData);
+      if (summonerData !== undefined) {
 
-          msg.reply("Here you go...");
-          msg.channel.send(summonerData);
-          msg.channel.send(" ..homo.");
-        });
+        msg.reply("Here you go...");
+        msg.channel.send(summonerData);
+        msg.channel.send(" ..homo.");
+
+      } else {
+
+        const summonerByNameURL = `https://na.api.pvp.net/api/lol/na/v1.4/summoner/by-name/${summonerName}?api_key=${riotApiKey}`;
+        logger.info("Requesting URL", summonerByNameURL);
+
+        request
+          .get(summonerByNameURL)
+          .set('Accept', 'application/json')
+          .end(function(err, res){
+            logger.debug(res.req.res);
+
+            summonerData = res.req.res.text;
+            data.summoners[summonerData] = summonerData;
+            //let summonerData = JSON.parse(res.req.res.text);
+            msg.reply("Here you go...");
+            msg.channel.send(summonerData);
+            msg.channel.send(" ..homo.");
+          });
+
+      }
+
+    }
+
+    if (command === "cache") {
+      msg.channel.send("```\n", 'asdfasfasf test', "\n```\n");
+    }
+
+    if (command === "shrek") {
+      client.sendTTSMessage(msg.channel, "It's all ogre now.", function() {});
     }
 
     //if (content === "reset") { msg.reply("resetting available champion pool"); }
@@ -80,5 +104,6 @@ client.on('message', (msg) => {
     // http://knowyourmeme.com/memes/shrek-is-love-shrek-is-life
   }
 });
+
 
 client.login(discordToken);

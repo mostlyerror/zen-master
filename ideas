@@ -1,5 +1,8 @@
 make a standalone script tht queries Riot's API for list of all champions and store in memory.
 
+possible traversal to the right information in riot's data model
+requested summonerName -> summonerID -> currentGame -> enemySummonerNames ->
+enemySummonerIDs -> enemySummonerStats
 
 
 What problem am I going to solve?
