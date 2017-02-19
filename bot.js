@@ -1,6 +1,8 @@
 const request = require('superagent');
 const Discord = require('discord.js');
 const pry     = require('pryjs');
+const fs      = require('fs');
+const util    = require('util');
 
 function log(level, ...args) {
   console.log(`[${level}]\t${new Date().toISOString()} ${args}`);
@@ -8,14 +10,16 @@ function log(level, ...args) {
 
 const logger = {
   info:  (...args) => { log('INFO', args)  },
-  debug: (...args) => { log('DEBUG', args) },
+  debug: (...args) => {
+    console.log(util.inspect(args));
+  },
   error: (...args) => { log('ERROR', args) },
 };
 
-// this is my in-memory cache
+
 let data = {
-  summoners: {
-  }
+  urls: {},
+  misc: {}
 };
 
 const discordToken = 'Mjc5Nzc4NjA4MDg2Nzc3ODU3.C3_2QA.nosV5EIvvl8ageIAGoWDlbTUqp4';
@@ -28,6 +32,14 @@ client.on('ready', () => {
   // this should pull from a database
   // then "failover" to request from Riot API
   // local database acts as a cache, kinda
+
+  // load shrek.txt into memory
+  fs.readFile('shrek.txt', (err, buf) => {
+    if (err) throw err;
+    const lines = buf.toString().split('\n\n');
+    data.misc['shrek'] = lines;
+    logger.info("shrek.txt loaded");
+  });
 });
 
 // in the future, a dispatch function of sorts
@@ -85,25 +97,28 @@ client.on('message', (msg) => {
             msg.channel.send(summonerData);
             msg.channel.send(" ..homo.");
           });
-
       }
-
     }
 
     if (command === "cache") {
       msg.channel.send("```\n", 'asdfasfasf test', "\n```\n");
     }
 
+    // http://knowyourmeme.com/memes/shrek-is-love-shrek-is-life
     if (command === "shrek") {
-      client.sendTTSMessage(msg.channel, "It's all ogre now.", function() {});
+      let i = randomInt(0, data.misc.shrek.length);
+      const text = data.misc.shrek[i];
+      msg.channel.send(text, {tts: true});
     }
 
     //if (content === "reset") { msg.reply("resetting available champion pool"); }
-
-    // add shrek thing
-    // http://knowyourmeme.com/memes/shrek-is-love-shrek-is-life
   }
 });
+
+// random int between low, high exclusive
+function randomInt (low, high) {
+  return Math.floor(Math.random() * (high - low)) + low;
+}
 
 
 client.login(discordToken);
