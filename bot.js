@@ -17,21 +17,36 @@ const logger = {
 };
 
 
+const discordToken = 'Mjc5Nzc4NjA4MDg2Nzc3ODU3.C3_2QA.nosV5EIvvl8ageIAGoWDlbTUqp4';
+const client = new Discord.Client();
+const prefix = 'zm';
+
+const RiotApi = {
+  apiKey: '98b67977-fba4-4435-88a0-461acf65bb34',
+  baseUrl: 'https://na.api.pvp.net/api/lol/na/v1.4',
+  getSummoner: function (name) {
+    const url = `${this.baseUrl}/summoner/by-name/${name}?api_key=${this.apiKey}`;
+    request
+    .get(url)
+    .end(function(err, res){
+      if (err) throw err;
+      let data =  JSON.parse(res.req.res.text);
+      return data;
+    });
+  },
+}
+
+
 let data = {
-  urls: {},
+  summoners: {},
   misc: {}
 };
 
-const discordToken = 'Mjc5Nzc4NjA4MDg2Nzc3ODU3.C3_2QA.nosV5EIvvl8ageIAGoWDlbTUqp4';
-const riotApiKey = '98b67977-fba4-4435-88a0-461acf65bb34';
-const client = new Discord.Client();
 
 client.on('ready', () => {
   logger.info("My body is ready..");
 
-  // this should pull from a database
-  // then "failover" to request from Riot API
-  // local database acts as a cache, kinda
+  RiotApi.getSummoner('jasonwaterfallz');
 
   // load shrek.txt into memory
   fs.readFile('shrek.txt', (err, buf) => {
@@ -42,17 +57,12 @@ client.on('ready', () => {
   });
 });
 
-// in the future, a dispatch function of sorts
-//let commands = {};
-
-const prefix = 'zm';
 
 client.on('message', (msg) => {
   logger.info(msg.author.username, msg.content);
 
   // only handle zm <message>
   if (msg.content.startsWith(prefix)) {
-
     // prevent botception
     if (msg.author.bot) return;
 
@@ -60,48 +70,64 @@ client.on('message', (msg) => {
 
     logger.info("Command was " + command);
 
+    if (command === "start") {
+      const summonerName = lastArg(msg);
+
+      //// data lookup for the message sender's league id
+      //let name = msg.author.name;
+      //let summonerID = data.summonerNameIdMap[name];
+      //if (!summonerID) {
+        //// request the ID by name from riot
+        //summonerId = requestSummonerId(name);
+        //data.summonerNameIdMap[name] = summonerId;
+        //// store in data hash
+      //} else {
+      //}
+    }
+
     if (command === "ping") msg.reply("pong");
 
     // zm summoner <summonerName>
     if (command === "summoner") {
-      
-      logger.debug('msg.content', msg.content);
-
-      const splitContent = msg.content.split(" ");
-      const summonerName = splitContent[splitContent.length - 1];
-
-      // look up summoner data in cache first
+      const summonerName = lastArg(msg);
       let summonerData = data.summoners[summonerName];
-
       if (summonerData !== undefined) {
-
-        msg.reply("Here you go...");
         msg.channel.send(summonerData);
-        msg.channel.send(" ..homo.");
-
       } else {
-
-        const summonerByNameURL = `https://na.api.pvp.net/api/lol/na/v1.4/summoner/by-name/${summonerName}?api_key=${riotApiKey}`;
-        logger.info("Requesting URL", summonerByNameURL);
-
-        request
-          .get(summonerByNameURL)
-          .set('Accept', 'application/json')
-          .end(function(err, res){
-            logger.debug(res.req.res);
-
-            summonerData = res.req.res.text;
-            data.summoners[summonerData] = summonerData;
-            //let summonerData = JSON.parse(res.req.res.text);
-            msg.reply("Here you go...");
-            msg.channel.send(summonerData);
-            msg.channel.send(" ..homo.");
-          });
+        let summonerData = RiotApi.getSummonerByName(summonerName);
+        data.summoners[summonerName] = summonerData;
+        msg.channel.send(summonerData);
       }
     }
 
-    if (command === "cache") {
-      msg.channel.send("```\n", 'asdfasfasf test', "\n```\n");
+    if (command === "stats") {
+      //const splitContent = msg.content.split(" ");
+      //const name = splitContent[splitContent.length - 1];
+      //const url = data.urls.summonerByName(name);
+
+      //request
+      //.get(url)
+      //.then(function(res, err){
+        //const json = res.res.req.res.text;
+        //const parsed = JSON.parse(json);
+        //return parsed[name]['id'];
+      //})
+      //.then(function(id) {
+        //const url = data.urls.summonerStatsById(id);
+        //request
+        //.get(url)
+        //.then(function(res, err) {
+          //const json = res.res.req.res.text;
+          //const parsed = JSON.parse(json);
+          //console.log(util.inspect(parsed));
+
+          //msg.channel.send(parsed);
+        //})
+      //})
+      //.catch(function (err) {
+        //console.log('error happened?', err);
+      //});
+
     }
 
     // http://knowyourmeme.com/memes/shrek-is-love-shrek-is-life
@@ -111,6 +137,10 @@ client.on('message', (msg) => {
       msg.channel.send(text, {tts: true});
     }
 
+    //if (command === "cache") {
+      //msg.channel.send("```\n", 'asdfasfasf test', "\n```\n");
+    //}
+    //
     //if (content === "reset") { msg.reply("resetting available champion pool"); }
   }
 });
@@ -120,5 +150,10 @@ function randomInt (low, high) {
   return Math.floor(Math.random() * (high - low)) + low;
 }
 
+// zm start <name> -> name
+function lastArg(msg) {
+  const splitContent = msg.content.split(" ");
+  return splitContent[splitContent.length - 1];
+}
 
 client.login(discordToken);
