@@ -24,7 +24,7 @@
   "homepage": "https://github.com/mostlyerror/zen-master#readme",
   "dependencies": {
     "discord.js": "^11.0.0",
-    "pryjs": "^1.0.3",
-    "superagent": "^3.4.3"
+    "get-json": "0.0.3",
+    "pryjs": "^1.0.3"
   }
 }

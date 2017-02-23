@@ -1,8 +1,11 @@
+//const request = require('superagent')
 const Discord = require('discord.js')
 const pry     = require('pryjs')
 const fs      = require('fs')
 const util    = require('util')
 const getJSON = require('get-json')
+const async = require('asyncawait/async')
+const await = require('asyncawait/await')
 
 function log(level, ...args) {
   console.log(`[${level}]\t${new Date().toISOString()} ${args}`)
@@ -47,7 +50,6 @@ client.on('ready', () => {
   })
   
   registerCommand('zm', 'help', (msg, ...args) => {
-    logger.debug(msg, args)
     msg.channel.send('fu!')
   })
 
