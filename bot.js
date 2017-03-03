@@ -3,9 +3,13 @@ const Discord = require('discord.js')
 const pry     = require('pryjs')
 const fs      = require('fs')
 const util    = require('util')
-const getJSON = require('get-json')
-const async = require('asyncawait/async')
-const await = require('asyncawait/await')
+//const getJSON = require('get-json')
+//const Q       = require('q')
+//const request = require('request')
+//const deferredGet = Q.nfbind(request)
+const rp = require('request-promise')
+//const prettyjson = require('prettyjson')
+const stringify = require('json-stringify')
 
 function log(level, ...args) {
   console.log(`[${level}]\t${new Date().toISOString()} ${args}`)
@@ -21,15 +25,19 @@ const logger = {
 
 
 const discordToken = 'Mjc5Nzc4NjA4MDg2Nzc3ODU3.C3_2QA.nosV5EIvvl8ageIAGoWDlbTUqp4'
-const client = new Discord.Client()
+const RiotApiKey = '98b67977-fba4-4435-88a0-461acf65bb34'
+const bot = new Discord.Client()
 
 const RiotApi = {
-  apiKey: '98b67977-fba4-4435-88a0-461acf65bb34',
   baseUrl: 'https://na.api.pvp.net/api/lol/na',
+  apiString: `?api_key=${RiotApiKey}`,
   urls: {
     getSummoner: (name) => {
-      return `${RiotApi.baseUrl}/v1.4/summoner/by-name/${name}?api_key=${RiotApi.apiKey}`
+      return `${RiotApi.baseUrl}/v1.4/summoner/by-name/${name}${RiotApi.apiString}`
     },
+    getSummonerLeague: (id) => {
+      return `${RiotApi.baseUrl}/v2.5/league/by-summoner/${id}${RiotApi.apiString}`
+    }
   }
 }
 
@@ -38,7 +46,8 @@ let db = {
   summoners: {}
 }
 
-client.on('ready', () => {
+bot.on('ready', () => {
+
   logger.info("My body is ready..")
 
   // load shrek.txt into memory
@@ -55,22 +64,54 @@ client.on('ready', () => {
 
   registerCommand('zm', 'rank', (msg, ...args) => {
     let name = args[0]
-    msg.channel.send(RiotApi.urls.getSummoner(name))
+    let url = RiotApi.urls.getSummoner(name)
+
+    msg.channel.send('retrieving ranked data for ' + name)
+    msg.channel.send(url)
+
+    rp.get({
+      uri: url,
+      transform: function (body, res) {
+        let data = JSON.parse(body)
+        return data[name]['id']
+      }
+    })
+    .then(function (id) {
+      let url = RiotApi.urls.getSummonerLeague(id)
+      return rp.get({
+        uri: url,
+        transform: function (body, res) {
+          let data = JSON.parse(body)
+          let rankData = data[id.toString()]
+          logger.debug('rankData', rankData)
+          return rankData
+        }
+      })
+    })
+    .then(function (data) {
+      //logger.debug(data)
+      //logger.debug(msg)
+      let out = stringify(data, null, 2, {offset: 4})
+      msg.channel.send(out, {split: true})
+    })
+    .catch((err) => {
+      logger.error(err)
+    })
   })
 })
 
 function registerCommand (prefix, command, callback) {
-  client.on('message', (msg) => {
+  bot.on('message', (msg) => {
     // prevent botception
     if (msg.author.bot) return false
 
-    // split message into prefix, command, and arguments
-    let parsed = msg.content.split(' ')
-    let [prefix, cmd] = parsed.splice(0, 2)
-    let args = (parsed.length ? parsed : [])
+      // split message into prefix, command, and arguments
+      let parsed = msg.content.split(' ')
+      let [prefix, cmd] = parsed.splice(0, 2)
+      let args = (parsed.length ? parsed : [])
 
-    // fire the registered handler
-    if (msg.content.startsWith(prefix) && (cmd === command)) callback(msg, args)
+      // fire the registered handler
+      if (msg.content.startsWith(prefix) && (cmd === command)) callback(msg, args)
   })
 }
 
@@ -85,7 +126,7 @@ function lastArg(msg) {
   return splitContent[splitContent.length - 1]
 }
 
-client.login(discordToken)
+bot.login(discordToken)
 
 // show line number of this pesky warning/error!
 process.on("unhandledRejection", err => {
