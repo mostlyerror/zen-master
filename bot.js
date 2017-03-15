@@ -7,6 +7,7 @@ const logger = require('./logger')
 const rankCommand = require('./commands/rank')
 const helpCommand = require('./commands/help')
 const registerCommand = require('./commands/register')
+const debugCommand = require('./commands/debug') // dump in-memory db
 
 
 const discordToken = 'Mjc5Nzc4NjA4MDg2Nzc3ODU3.C3_2QA.nosV5EIvvl8ageIAGoWDlbTUqp4'
@@ -29,9 +30,10 @@ bot.on('ready', () => {
     logger.info("shrek.txt loaded")
   })
   
-  attachCommandHandler('zm', 'rank', rankCommand(db))
-  attachCommandHandler('zm', 'help', helpCommand)
+  attachCommandHandler('zm', 'rank',     rankCommand(db))
+  attachCommandHandler('zm', 'help',     helpCommand)
   attachCommandHandler('zm', 'register', registerCommand(db))
+  attachCommandHandler('zm', 'debug',    debugCommand(db))
 })
 
 function attachCommandHandler (prefix, command, callback) {
