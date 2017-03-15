@@ -26,13 +26,13 @@ module.exports = function (db) {
       })
     })
     .then(function (rankData) {
-      msg.channel.send(stringify(rankData, null, 2, {offset: 4}))
+      msg.channel.send(stringify(rankData, null, 2, {offset: 4}), {code: true})
     })
     .catch((err) => {
       logger.error(err)
       let out =  "Oops! Something went wrong..\n"
           out += err.message
-      msg.channel.send(out)
+      msg.channel.send(out, {code: true})
     })
   }
 }

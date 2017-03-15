@@ -10,7 +10,7 @@ module.exports = function (db) {
     // TODO investigate why the double array
     let summonerName = (args.length ? args[0][0] : userName)
     db.userToSummonerMap[userName] = summonerName
-    msg.channel.send(`${userName} registered as summoner: ${summonerName}`, {code: true})
+    msg.channel.send(`@${userName} registered as summoner: ${summonerName}`, {code: true})
 
     //TODO pre-fetch summoner ID here
 
