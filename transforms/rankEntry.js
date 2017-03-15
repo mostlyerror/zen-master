@@ -17,18 +17,18 @@
     //}
   //]
 //}
-module.exports = function (json, res) {
-  const data = json[id.toString()]
-  const rankData = data[0]
-  const { tier, queue, entries: [{wins, losses, division, leaguePoints}] } = rankData
-  return {
-    tier: tier,
-    queue: queue,
-    wins: wins,
-    losses: losses,
-    division: division,
-    leaguePoints: leaguePoints,
+module.exports = function (id) {
+  return function (json, res) {
+    const data = json[id.toString()]
+    const rankData = data[0]
+    const { tier, queue, entries: [{wins, losses, division, leaguePoints}] } = rankData
+    return {
+      tier: tier,
+      queue: queue,
+      wins: wins,
+      losses: losses,
+      division: division,
+      leaguePoints: leaguePoints,
+    }
   }
 }
-
-

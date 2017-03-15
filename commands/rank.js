@@ -7,20 +7,18 @@ const rankEntryTransform = require('../transforms/rankEntry')
 
 module.exports = function(msg, ...args) {
   let name = args[0]
-  let url = RiotApi.urls.getSummoner(name)
   rp.get({
-    uri: url,
+    uri: RiotApi.urls.getSummoner(name),
     json: true,
     transform: function (json, res) {
       return json[name]['id']
     }
   })
   .then(function (id) {
-    let url = RiotApi.urls.getSummonerLeagueEntry(id)
     return rp.get({
-      uri: url,
+      uri: RiotApi.urls.getSummonerLeagueEntry(id),
       json: true,
-      transform:rankEntryTransform,
+      transform: rankEntryTransform(id),
     })
   })
   .then(function (rankData) {
