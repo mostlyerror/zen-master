@@ -1,18 +1,16 @@
 //const RiotApi = require('../riot')
 //const rp = require('request-promise')
 //const stringify = require('json-stringify')
-//const pry = require('pryjs')
 //const logger = require('../logger')
-//const rankEntryTransform = require('../transforms/rankEntry')
 
 module.exports = function (db) {
   return function(msg, ...args) {
     let userName = msg.author.username
     // username matches summoner name if no args
+    // TODO investigate why the double array
     let summonerName = (args.length ? args[0][0] : userName)
     db.userToSummonerMap[userName] = summonerName
-    msg.channel.send(`${userName} registered as summoner: ${summonerName}`)
-    console.log('end of register command', db)
+    msg.channel.send(`${userName} registered as summoner: ${summonerName}`, {code: true})
 
     //TODO pre-fetch summoner ID here
 

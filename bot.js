@@ -17,19 +17,19 @@ let db = {
   misc: {},
   summoners: {},
   userToSummonerMap: {},
+  commands: [],
 }
 
 bot.on('ready', () => {
-
   logger.info("My body is ready..")
 
-  fs.readFile('shrek.txt', (err, buf) => {
-    if (err) throw err
-    const lines = buf.toString().split('\n\n')
-    db.misc['shrek'] = lines
-    logger.info("shrek.txt loaded")
-  })
-  
+  // shrek
+  //fs.readFile('shrek.txt', (err, buf) => {
+    //if (err) throw err
+    //const lines = buf.toString().split('\n\n')
+    //db.misc['shrek'] = lines
+    //logger.info("shrek.txt loaded")
+  //})
   attachCommandHandler('zm', 'rank',     rankCommand(db))
   attachCommandHandler('zm', 'help',     helpCommand)
   attachCommandHandler('zm', 'register', registerCommand(db))
@@ -47,6 +47,11 @@ function attachCommandHandler (prefix, command, callback) {
       callback(msg, parsedMessage.args)
     }
   })
+
+  // add to command list
+  // should i also keep a reference to curried functions themselves,
+  // to trigger from other commands, not just as callbacks?
+  db.commands.push(command)
 }
 
 // splits message into prefix, command, and arguments
