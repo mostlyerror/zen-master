@@ -3,6 +3,7 @@ const rp = require('request-promise')
 const stringify = require('json-stringify')
 const pry = require('pryjs')
 const logger = require('../logger')
+const rankEntryTransform = require('../transforms/rankEntry')
 
 module.exports = function(msg, ...args) {
   let name = args[0]
@@ -19,19 +20,7 @@ module.exports = function(msg, ...args) {
     return rp.get({
       uri: url,
       json: true,
-      transform: function (json, res) {
-        const data = json[id.toString()]
-        const rankData = data[0]
-        const { tier, queue, entries: [{wins, losses, division, leaguePoints}] } = rankData
-        return {
-          tier: tier,
-          queue: queue,
-          wins: wins,
-          losses: losses,
-          division: division,
-          leaguePoints: leaguePoints,
-        }
-      }
+      transform:rankEntryTransform,
     })
   })
   .then(function (rankData) {
