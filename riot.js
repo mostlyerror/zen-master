@@ -9,7 +9,10 @@ const RiotApi = {
     },
     getSummonerLeague: (id) => {
       return `${RiotApi.baseUrl}/v2.5/league/by-summoner/${id}${RiotApi.apiString}`
-    }
+    },
+    getSummonerLeagueEntry: (id) => {
+      return `${RiotApi.baseUrl}/v2.5/league/by-summoner/${id}/entry${RiotApi.apiString}`
+    },
   }
 }
 
