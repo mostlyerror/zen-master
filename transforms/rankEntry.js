@@ -21,8 +21,9 @@ module.exports = function (id) {
   return function (json, res) {
     const data = json[id.toString()]
     const rankData = data[0]
-    const { tier, queue, entries: [{wins, losses, division, leaguePoints}] } = rankData
+    const { tier, queue, entries: [{playerOrTeamName, wins, losses, division, leaguePoints}] } = rankData
     return {
+      name: playerOrTeamName,
       tier: tier,
       queue: queue,
       wins: wins,
