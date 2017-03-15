@@ -5,28 +5,35 @@ const pry = require('pryjs')
 const logger = require('../logger')
 const rankEntryTransform = require('../transforms/rankEntry')
 
-module.exports = function(msg, ...args) {
-  let name = args[0]
-  rp.get({
-    uri: RiotApi.urls.getSummoner(name),
-    json: true,
-    transform: function (json, res) {
-      return json[name]['id']
-    }
-  })
-  .then(function (id) {
-    return rp.get({
-      uri: RiotApi.urls.getSummonerLeagueEntry(id),
+module.exports = function (db) {
+  return function(msg, ...args) {
+    const username = msg.author.username
+    let name = db.userToSummonerMap[username] || username
+    rp.get({
+      uri: RiotApi.urls.getSummoner(name),
       json: true,
-      transform: rankEntryTransform(id),
+      resolveWithFullResponse: true,
+      transform: function (json, res) {
+        if (res.statusCode === 404) throw(`Couldn't find summoner named ${name}`)
+        return json[name]['id']
+      }
     })
-  })
-  .then(function (rankData) {
-    msg.channel.send(stringify(rankData, null, 2, {offset: 4}))
-  })
-  .catch((err) => {
-    logger.error(err)
-    msg.channel.send('oops! something went wrong.')
-  })
+    .then(function (id) {
+      return rp.get({
+        uri: RiotApi.urls.getSummonerLeagueEntry(id),
+        json: true,
+        transform: rankEntryTransform(id),
+      })
+    })
+    .then(function (rankData) {
+      msg.channel.send(stringify(rankData, null, 2, {offset: 4}))
+    })
+    .catch((err) => {
+      logger.error(err)
+      let out =  "Oops! Something went wrong..\n"
+          out += err.message
+      msg.channel.send(out)
+    })
+  }
 }
 

@@ -6,6 +6,7 @@ const logger = require('./logger')
 // commands
 const rankCommand = require('./commands/rank')
 const helpCommand = require('./commands/help')
+const registerCommand = require('./commands/register')
 
 
 const discordToken = 'Mjc5Nzc4NjA4MDg2Nzc3ODU3.C3_2QA.nosV5EIvvl8ageIAGoWDlbTUqp4'
@@ -13,7 +14,8 @@ const bot = new Discord.Client()
 
 let db = {
   misc: {},
-  summoners: {}
+  summoners: {},
+  userToSummonerMap: {},
 }
 
 bot.on('ready', () => {
@@ -27,23 +29,34 @@ bot.on('ready', () => {
     logger.info("shrek.txt loaded")
   })
   
-  registerCommand('zm', 'rank', rankCommand)
-  registerCommand('zm', 'help', helpCommand)
+  attachCommandHandler('zm', 'rank', rankCommand(db))
+  attachCommandHandler('zm', 'help', helpCommand)
+  attachCommandHandler('zm', 'register', registerCommand(db))
 })
 
-function registerCommand (prefix, command, callback) {
+function attachCommandHandler (prefix, command, callback) {
   bot.on('message', (msg) => {
     // prevent botception
     if (msg.author.bot) return false
+    const parsedMessage = parseMessage(msg)
 
-      // split message into prefix, command, and arguments
-      let parsed = msg.content.split(' ')
-      let [prefix, cmd] = parsed.splice(0, 2)
-      let args = (parsed.length ? parsed : [])
-
-      // fire the registered handler
-      if (msg.content.startsWith(prefix) && (cmd === command)) callback(msg, args)
+    // fire the attached handler
+    if (msg.content.startsWith(prefix) && (parsedMessage.command === command)) {
+      callback(msg, parsedMessage.args)
+    }
   })
+}
+
+// splits message into prefix, command, and arguments
+function parseMessage(msg) {
+  let parsed = msg.content.split(' ')
+  let [prefix, cmd] = parsed.splice(0, 2)
+  let args = (parsed.length ? parsed : [])
+  return {
+    prefix: prefix,
+    command: cmd,
+    args: args
+  }
 }
 
 // random int between low, high exclusive
